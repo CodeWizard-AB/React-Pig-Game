@@ -1,35 +1,67 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from "react";
 
-function App() {
-  const [count, setCount] = useState(0)
+export default function App() {
+	class ButtonObj {
+		constructor(text, style, emoji) {
+			this.text = text;
+			this.style = style;
+			this.emoji = emoji;
+		}
+	}
 
-  return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+	const buttons = [
+		new ButtonObj("new game", "btn--new", "🔄"),
+		new ButtonObj("roll dice", "btn--roll", "🎲"),
+		new ButtonObj("hold", "btn--hold", "📥"),
+	];
+
+	let randomInt;
+
+	return (
+		<main>
+			<Player />
+			<Player />
+			<figure>
+				<img src="../public/images/dice-1.png" className="dice" />
+			</figure>
+			{buttons.map((button, i) => (
+				<Button key={i} button={button} />
+			))}
+		</main>
+	);
 }
 
-export default App
+function Player() {
+	const [active, setActive] = useState(false);
+  const [currentScore, setCurrentScore] = useState(0);
+	return (
+		<div className="player">
+			<h1 className="name">Player 1</h1>
+			<PlayerScore />
+			<CurrentScore current={currentScore} setCurrent={setCurrentScore}/>
+		</div>
+	);
+}
+
+function CurrentScore({current, setCurrent}) {
+	return (
+		<div className="current">
+			<p className="current-label">Current</p>
+			<p className="current-score">{current}</p>
+		</div>
+	);
+}
+
+function PlayerScore() {
+	const [score, setScore] = useState(0);
+	return <p className="score">{score}</p>;
+}
+
+function Button({ button }) {
+	return (
+		<button className={`${button.style} btn`}>
+			{button.emoji}
+			{button.text}
+		</button>
+	);
+}
