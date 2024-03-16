@@ -11,39 +11,64 @@ export default function App() {
 
 	const buttons = [
 		new ButtonObj("new game", "btn--new", "🔄"),
-		new ButtonObj("roll dice", "btn--roll", "🎲"),
 		new ButtonObj("hold", "btn--hold", "📥"),
+		new ButtonObj("roll dice", "btn--roll", "🎲"),
 	];
 
-	let randomInt;
+	const random = Math.ceil(Math.random() * 6);
+	const [image, setImage] = useState(null);
+	const [randomInt, setRandomInt] = useState(Math.ceil(Math.random() * 6));
+
+	const handleButton = function ({ text }) {
+		if (text === "new game") {
+			console.log("new game");
+		} else if (text === "hold") {
+			console.log("hold");
+		} else {
+			setImage(`images/dice-${randomInt}.png`);
+			setRandomInt(random);
+		}
+	};
 
 	return (
 		<main>
-			<Player />
-			<Player />
+			{Array.from({ length: 2 }, (_, i) => (
+				<Player num={i + 1} key={i} />
+			))}
+
 			<figure>
-				<img src="../public/images/dice-1.png" className="dice" />
+				<img src={image} className="dice" />
 			</figure>
+
 			{buttons.map((button, i) => (
-				<Button key={i} button={button} />
+				<Button
+					key={i}
+					button={button}
+					event={handleButton.bind(this, button)}
+				/>
 			))}
 		</main>
 	);
 }
 
-function Player() {
+function Player({ num }) {
 	const [active, setActive] = useState(false);
-  const [currentScore, setCurrentScore] = useState(0);
+	const [currentScore, setCurrentScore] = useState(0);
+
 	return (
 		<div className="player">
-			<h1 className="name">Player 1</h1>
-			<PlayerScore />
-			<CurrentScore current={currentScore} setCurrent={setCurrentScore}/>
+			<PlayerNum num={num} />
+			<PlayerScore currentScore={currentScore} />
+			<CurrentScore current={currentScore} setCurrent={setCurrentScore} />
 		</div>
 	);
 }
 
-function CurrentScore({current, setCurrent}) {
+function PlayerNum({ num }) {
+	return <h1 className="name">Player {num}</h1>;
+}
+
+function CurrentScore({ current, setCurrent }) {
 	return (
 		<div className="current">
 			<p className="current-label">Current</p>
@@ -52,14 +77,18 @@ function CurrentScore({current, setCurrent}) {
 	);
 }
 
-function PlayerScore() {
+function PlayerScore({ currentScore }) {
 	const [score, setScore] = useState(0);
-	return <p className="score">{score}</p>;
+	return (
+		<p className="score" onChange={setScore.bind(this, score + currentScore)}>
+			{score}
+		</p>
+	);
 }
 
-function Button({ button }) {
+function Button({ button, event }) {
 	return (
-		<button className={`${button.style} btn`}>
+		<button className={`${button.style} btn`} onClick={event}>
 			{button.emoji}
 			{button.text}
 		</button>
