@@ -15,25 +15,40 @@ export default function App() {
 		new ButtonObj("roll dice", "btn--roll", "🎲"),
 	];
 
-	const random = Math.ceil(Math.random() * 6);
+	const [active, setActive] = useState(1);
 	const [image, setImage] = useState(null);
+	const random = Math.ceil(Math.random() * 6);
 	const [randomInt, setRandomInt] = useState(Math.ceil(Math.random() * 6));
+	const [currentScore, setCurrentScore] = useState(0);
 
 	const handleButton = function ({ text }) {
 		if (text === "new game") {
 			console.log("new game");
 		} else if (text === "hold") {
-			console.log("hold");
+			setActive(active === 1 ? 2 : 1);
+			setCurrentScore(0);
 		} else {
 			setImage(`images/dice-${randomInt}.png`);
 			setRandomInt(random);
+
+			if (randomInt === 1) {
+				setCurrentScore(0);
+				setActive(active === 1 ? 2 : 1);
+			} else {
+				setCurrentScore(currentScore + randomInt);
+			}
 		}
 	};
 
 	return (
 		<main>
 			{Array.from({ length: 2 }, (_, i) => (
-				<Player num={i + 1} key={i} />
+				<Player
+					num={i + 1}
+					key={i}
+					active={active}
+					currentScore={currentScore}
+				/>
 			))}
 
 			<figure>
@@ -51,15 +66,15 @@ export default function App() {
 	);
 }
 
-function Player({ num }) {
-	const [active, setActive] = useState(false);
-	const [currentScore, setCurrentScore] = useState(0);
+function Player({ num, active, currentScore, score }) {
+	const isActive = num === active;
+	console.log(currentScore);
 
 	return (
-		<div className="player">
+		<div className={`player ${isActive && "player--active"}`}>
 			<PlayerNum num={num} />
-			<PlayerScore currentScore={currentScore} />
-			<CurrentScore current={currentScore} setCurrent={setCurrentScore} />
+			<PlayerScore playerScore={score} />
+			<CurrentScore current={isActive && currentScore} />
 		</div>
 	);
 }
@@ -68,19 +83,19 @@ function PlayerNum({ num }) {
 	return <h1 className="name">Player {num}</h1>;
 }
 
-function CurrentScore({ current, setCurrent }) {
+function CurrentScore({ current }) {
 	return (
 		<div className="current">
 			<p className="current-label">Current</p>
-			<p className="current-score">{current}</p>
+			<p className="current-score">{current || 0}</p>
 		</div>
 	);
 }
 
-function PlayerScore({ currentScore }) {
+function PlayerScore({ playerScore }) {
 	const [score, setScore] = useState(0);
 	return (
-		<p className="score" onChange={setScore.bind(this, score + currentScore)}>
+		<p className="score" onChange={setScore.bind(this, score + playerScore)}>
 			{score}
 		</p>
 	);
