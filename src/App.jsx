@@ -18,24 +18,38 @@ export default function App() {
 	const [active, setActive] = useState(1);
 	const [image, setImage] = useState(null);
 	const random = Math.ceil(Math.random() * 6);
-	const [randomInt, setRandomInt] = useState(Math.ceil(Math.random() * 6));
 	const [currentScore, setCurrentScore] = useState(0);
+	const [randomInt, setRandomInt] = useState(Math.ceil(Math.random() * 6));
+	const [player1, setPlayer1] = useState(0);
+	const [player2, setPlayer2] = useState(0);
+
+	const gameInit = function () {
+		setActive(1);
+		setPlayer1(0);
+		setPlayer2(0);
+		setImage(null);
+		setCurrentScore(0);
+	};
+
+	const switchPlayer = function () {
+		setActive(active === 1 ? 2 : 1);
+		setCurrentScore(0);
+	};
 
 	const handleButton = function ({ text }) {
-		if (text === "new game") {
-			console.log("new game");
-		} else if (text === "hold") {
-			setActive(active === 1 ? 2 : 1);
-			setCurrentScore(0);
-		} else {
-			setImage(`images/dice-${randomInt}.png`);
-			setRandomInt(random);
-
-			if (randomInt === 1) {
-				setCurrentScore(0);
-				setActive(active === 1 ? 2 : 1);
-			} else {
-				setCurrentScore(currentScore + randomInt);
+		if (text === "new game") gameInit();
+		if (!(player1 >= 20 || player2 >= 20)) {
+			if (text === "roll dice") {
+				setImage(`images/dice-${randomInt}.png`);
+				setRandomInt(random);
+				randomInt === 1
+					? switchPlayer()
+					: setCurrentScore(currentScore + randomInt);
+			} else if (text === "hold") {
+				active === 2
+					? setPlayer1(player1 + currentScore)
+					: setPlayer2(player2 + currentScore);
+				switchPlayer();
 			}
 		}
 	};
@@ -48,6 +62,7 @@ export default function App() {
 					key={i}
 					active={active}
 					currentScore={currentScore}
+					score={i === 1 ? player1 : player2}
 				/>
 			))}
 
@@ -68,10 +83,13 @@ export default function App() {
 
 function Player({ num, active, currentScore, score }) {
 	const isActive = num === active;
-	console.log(currentScore);
-
+	const winningScore = score >= 20;
 	return (
-		<div className={`player ${isActive && "player--active"}`}>
+		<div
+			className={`player ${
+				!winningScore ? isActive && "player--active" : "player--winner"
+			}`}
+		>
 			<PlayerNum num={num} />
 			<PlayerScore playerScore={score} />
 			<CurrentScore current={isActive && currentScore} />
@@ -93,12 +111,7 @@ function CurrentScore({ current }) {
 }
 
 function PlayerScore({ playerScore }) {
-	const [score, setScore] = useState(0);
-	return (
-		<p className="score" onChange={setScore.bind(this, score + playerScore)}>
-			{score}
-		</p>
-	);
+	return <p className="score">{playerScore}</p>;
 }
 
 function Button({ button, event }) {
